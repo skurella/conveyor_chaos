@@ -270,7 +270,14 @@ TEST(LocationProbabilityCalculatorTest, ProcessesBelt) {
     EXPECT_EQ(c.distribution.at(2 * b.b + 1),   1.0 / c.max_width);
 }
 
-double exp_travel(const CondExpTravelCalculator& cond_exp_travel, const LocationProbabilityCalculator& distribution) {
+/// The main conveyor chaos solver.
+struct ConveyorChaos {
+    CondExpTravelCalculator cond_exp_travel;
+    LocationProbabilityCalculator distribution;
+    ConveyorBelts belts;
+
+    /// Expected travel distance without fixing the direction of any belts.
+    double initial_exp_travel() {
     double res = 0;
     for (int i = 0; i < 2 * cond_exp_travel.max_width + 1; i++) {
         res += cond_exp_travel.exp_travel[i] * distribution.distribution[i];
@@ -278,23 +285,24 @@ double exp_travel(const CondExpTravelCalculator& cond_exp_travel, const Location
     return res;
 }
 
-TEST(ExpTravelTest, ZeroWhenEmpty) {
-    CondExpTravelCalculator cond_exp_travel;
-    LocationProbabilityCalculator distribution;
+    ConveyorChaos(ConveyorBelts&& belts_init) : belts{std::move(belts_init)} {
+        cond_exp_travel.process(belts);
+    }
+};
 
-    EXPECT_EQ(exp_travel(cond_exp_travel, distribution), 0);
+TEST(ConveyorChaosTest, ZeroWhenEmpty) {
+    ConveyorChaos c({{}, {}, {}});
+
+    EXPECT_EQ(c.initial_exp_travel(), 0);
 }
 
-TEST(ExpTravelTest, ProcessesBelt) {
-    CondExpTravelCalculator cond_exp_travel;
-    LocationProbabilityCalculator distribution;
-    
-    ConveyorBelt belt{.h = 1, .a = 1000, .b = 2000};
-    cond_exp_travel.process(belt);
+TEST(ConveyorChaosTest, ProcessesBelt) {
+    ConveyorChaos c({{1}, {1000}, {2000}});
 
+    auto& belt = c.belts.belts.at(0);
     double belt_total_distance = belt.b - belt.a;
     double belt_expected_distance = belt_total_distance / 2;
-    double belt_probability = belt_total_distance / cond_exp_travel.max_width;
+    double belt_probability = belt_total_distance / c.cond_exp_travel.max_width;
 
-    EXPECT_NEAR(exp_travel(cond_exp_travel, distribution), belt_expected_distance * belt_probability, 1e-10);
+    EXPECT_NEAR(c.initial_exp_travel(), belt_expected_distance * belt_probability, 1e-10);
 }

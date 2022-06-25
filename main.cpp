@@ -212,3 +212,33 @@ TEST(CondExpTravelCalculatorTest, ProcessesBelts) {
     EXPECT_EQ(c.exp_travel[2 * b2],     0);
     EXPECT_EQ(c.exp_travel[2 * b2 + 1], 0);
 }
+
+struct LocationProbabilityCalculator {
+    static constexpr int max_width = 1000000;
+
+    /// Same layout as CondExpTravelCalculator::exp_travel.
+    vector<double> distribution;
+
+    LocationProbabilityCalculator() : distribution(2 * max_width + 1, 0) {
+        for (int i = 0; i < max_width; i++) {
+            distribution[2 * i + 1] = 1.0 / max_width;
+        }
+    }
+
+    double sum() const {
+        double sum = 0.0;
+        for (auto d : distribution) { sum += d; }
+        return sum;
+    }
+};
+
+TEST(LocationProbabilityCalculatorTest, InitializesToIntervals) {
+    LocationProbabilityCalculator c;
+    ASSERT_EQ(c.distribution.size(), 2 * c.max_width + 1);
+    EXPECT_EQ(c.distribution[0], 0);
+    EXPECT_EQ(c.distribution[1], 1.0 / c.max_width);
+    EXPECT_EQ(c.distribution[2], 0);
+    EXPECT_EQ(c.distribution[2 * c.max_width - 1], 1.0 / c.max_width);  
+    EXPECT_EQ(c.distribution[2 * c.max_width], 0);
+    EXPECT_NEAR(c.sum(), 1, 1e-10);
+}

@@ -242,3 +242,32 @@ TEST(LocationProbabilityCalculatorTest, InitializesToIntervals) {
     EXPECT_EQ(c.distribution[2 * c.max_width], 0);
     EXPECT_NEAR(c.sum(), 1, 1e-10);
 }
+
+double exp_travel(const CondExpTravelCalculator& cond_exp_travel, const LocationProbabilityCalculator& distribution) {
+    double res = 0;
+    for (int i = 0; i < 2 * cond_exp_travel.max_width + 1; i++) {
+        res += cond_exp_travel.exp_travel[i] * distribution.distribution[i];
+    }
+    return res;
+}
+
+TEST(ExpTravelTest, ZeroWhenEmpty) {
+    CondExpTravelCalculator cond_exp_travel;
+    LocationProbabilityCalculator distribution;
+
+    EXPECT_EQ(exp_travel(cond_exp_travel, distribution), 0);
+}
+
+TEST(ExpTravelTest, ProcessesBelt) {
+    CondExpTravelCalculator cond_exp_travel;
+    LocationProbabilityCalculator distribution;
+    
+    ConveyorBelt belt{.h = 1, .a = 1000, .b = 2000};
+    cond_exp_travel.process(belt);
+
+    double belt_total_distance = belt.b - belt.a;
+    double belt_expected_distance = belt_total_distance / 2;
+    double belt_probability = belt_total_distance / cond_exp_travel.max_width;
+
+    EXPECT_NEAR(exp_travel(cond_exp_travel, distribution), belt_expected_distance * belt_probability, 1e-10);
+}

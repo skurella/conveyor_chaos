@@ -15,5 +15,7 @@ FetchContent_MakeAvailable(googletest)
 # include(CTest)
 enable_testing()
 
-add_executable(conveyor_chaos main.cpp)
+file(GLOB SRCS *.cpp *.hpp)
+
+add_executable(conveyor_chaos ${SRCS})
 target_link_libraries(conveyor_chaos gtest_main)

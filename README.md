@@ -1,5 +1,7 @@
 # Conveyor chaos
 
+[![CMake](https://github.com/skurella/conveyor_chaos/actions/workflows/test.yml/badge.svg)](https://github.com/skurella/conveyor_chaos/actions/workflows/test.yml)
+
 For a problem description, see the [attached document](conveyor_chaos.pdf).
 
 ## Mathematical concepts

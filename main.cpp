@@ -234,14 +234,20 @@ struct LocationProbabilityCalculator {
         return sum;
     }
 
-    void process(const ConveyorBelt& belt) {
+    /// Probability of hitting a specific conveyor belt.
+    double probability(const ConveyorBelt& belt) const {
         double total_belt_probability = 0;
-        for (auto i = 2 * belt.a + 1; i <= 2 * belt.b - 1; i++) {
+        for (auto i = 2 * belt.a + 1; i <= 2 * belt.b - 1; ++i) {
             total_belt_probability += distribution[i];
-            distribution[i] = 0;
         }
+        return total_belt_probability;
+    }
+
+    void process(const ConveyorBelt& belt) {
+        double total_belt_probability = probability(belt);
         distribution[2 * belt.a] += total_belt_probability / 2;
         distribution[2 * belt.b] += total_belt_probability / 2;
+        for (auto i = 2 * belt.a + 1; i <= 2 * belt.b - 1; ++i) { distribution[i] = 0; }
     }
 };
 
@@ -278,12 +284,12 @@ struct ConveyorChaos {
 
     /// Expected travel distance without fixing the direction of any belts.
     double initial_exp_travel() {
-    double res = 0;
-    for (int i = 0; i < 2 * cond_exp_travel.max_width + 1; i++) {
-        res += cond_exp_travel.exp_travel[i] * distribution.distribution[i];
+        double res = 0;
+        for (int i = 0; i < 2 * cond_exp_travel.max_width + 1; i++) {
+            res += cond_exp_travel.exp_travel[i] * distribution.distribution[i];
+        }
+        return res;
     }
-    return res;
-}
 
     ConveyorChaos(ConveyorBelts&& belts_init) : belts{std::move(belts_init)} {
         cond_exp_travel.process(belts);

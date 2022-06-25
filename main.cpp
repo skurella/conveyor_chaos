@@ -105,6 +105,7 @@ TEST(ConveyorBeltsTest, SortsCoveyorBelts) {
 // };
 
 /// Calculates the expected travel distance conditional on x.
+/// Starts at ground and goes up.
 struct CondExpTravelCalculator {
     static constexpr int max_width = 1000000;
 
@@ -125,7 +126,7 @@ struct CondExpTravelCalculator {
 
     /// Factor the belt into the current state.
     void advance_past(const ConveyorBelt& belt) {
-        // Let i=k represent a segment (k, k+1). If a package falls inside the belt...
+        // If a package falls inside the belt...
         for (auto i = 2 * belt.a + 1; i <= 2 * belt.b - 1; i++) {
             // ...it's expected to travel half the belt's length and land on one of the sides.
             exp_travel[i] = static_cast<double>(belt.b - belt.a) / 2 + (exp_travel[2 * belt.a] + exp_travel[2 * belt.b]) / 2;
@@ -213,6 +214,8 @@ TEST(CondExpTravelCalculatorTest, ProcessesBelts) {
     EXPECT_EQ(c.exp_travel.at(2 * b2 + 1), 0);
 }
 
+/// Calculates the probability mass function for each x.
+/// Starts at top height and goes down.
 struct LocationProbabilityCalculator {
     static constexpr int max_width = 1000000;
 

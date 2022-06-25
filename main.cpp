@@ -243,6 +243,25 @@ struct LocationProbabilityCalculator {
         return total_belt_probability;
     }
 
+    double improvement(const ConveyorBelt& belt) const {
+        /// Improvement in expected travel below the belt due to fixing it left.
+        /// Fixing it in the opposite direction negates this improvement.
+        double improvement_below_left = probability(belt) * (belt.exp_travel_left - belt.exp_travel_right) / 2;
+        double improvement_below_right = -improvement_below_left;
+
+        /// Improvement in travel along the belt.
+        double exp_travel_left = 0, exp_travel_right = 0;
+        for (auto i = 2 * belt.a + 1; i <= 2 * belt.b - 1; ++i) {
+            exp_travel_left += distribution[i] * static_cast<double>(i - 2 * belt.a) / 2;
+            exp_travel_right += distribution[i] * static_cast<double>(2 * belt.b - i) / 2;
+        }
+        double exp_travel_unfixed = probability(belt) * static_cast<double>(belt.b - belt.a) / 2;
+
+        double improvement_left = improvement_below_left + exp_travel_left - exp_travel_unfixed;
+        double improvement_right = improvement_below_right + exp_travel_right - exp_travel_unfixed;
+        return max(improvement_left, improvement_right);
+    }
+
     void process(const ConveyorBelt& belt) {
         double total_belt_probability = probability(belt);
         distribution[2 * belt.a] += total_belt_probability / 2;
@@ -291,8 +310,24 @@ struct ConveyorChaos {
         return res;
     }
 
+    /// Analyzes how fixing each belt could improve the expected travel.
+    /// Returns the best improvement found.
+    double research_fixing_belts() {
+        double best_improvement = 0;
+        for (auto belt_it = belts.belts.rbegin(); belt_it != belts.belts.rend(); ++belt_it) {
+            double improvement = distribution.improvement(*belt_it);
+            if (improvement > best_improvement) { best_improvement = improvement; }
+            distribution.process(*belt_it);
+        }
+        return best_improvement;
+    }
+
     ConveyorChaos(ConveyorBelts&& belts_init) : belts{std::move(belts_init)} {
         cond_exp_travel.process(belts);
+    }
+
+    double get_best_result() {
+        return initial_exp_travel() - research_fixing_belts();
     }
 };
 
@@ -311,4 +346,14 @@ TEST(ConveyorChaosTest, ProcessesBelt) {
     double belt_probability = belt_total_distance / c.cond_exp_travel.max_width;
 
     EXPECT_NEAR(c.initial_exp_travel(), belt_expected_distance * belt_probability, 1e-10);
+}
+
+TEST(ConveyorChaosTest, SampleTestCase1) {
+    ConveyorChaos c({{10, 20}, {100000, 400000}, {600000, 800000}});
+    EXPECT_NEAR(c.get_best_result(), 155000.0, 10e-6);
+}
+
+TEST(ConveyorChaosTest, SampleTestCase2) {
+    ConveyorChaos c({{2, 8, 5, 9, 4}, {5000, 2000, 7000, 9000, 0}, {7000, 8000, 11000, 11000, 4000}});
+    EXPECT_NEAR(c.get_best_result(), 36.5, 10e-6);
 }

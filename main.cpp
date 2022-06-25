@@ -86,10 +86,10 @@ TEST(ConveyorBeltsTest, SortsCoveyorBelts) {
     vector<int> H { 1, 3, 2, 2 }, A { 4, 4, 4, 3 }, B { 5, 6, 7, 8 };
     ConveyorBelts belts { H, A, B };
     ASSERT_EQ(belts.belts.size(), 4);
-    EXPECT_EQ(belts.belts[0], ConveyorBelt({ .h=1, .a=4 }));
-    EXPECT_EQ(belts.belts[1], ConveyorBelt({ .h=2, .a=3 }));
-    EXPECT_EQ(belts.belts[2], ConveyorBelt({ .h=2, .a=4 }));
-    EXPECT_EQ(belts.belts[3], ConveyorBelt({ .h=3, .a=4 }));
+    EXPECT_EQ(belts.belts.at(0), ConveyorBelt({ .h=1, .a=4 }));
+    EXPECT_EQ(belts.belts.at(1), ConveyorBelt({ .h=2, .a=3 }));
+    EXPECT_EQ(belts.belts.at(2), ConveyorBelt({ .h=2, .a=4 }));
+    EXPECT_EQ(belts.belts.at(3), ConveyorBelt({ .h=3, .a=4 }));
 }
 
 // struct SegmentTree {
@@ -147,8 +147,8 @@ struct CondExpTravelCalculator {
 TEST(CondExpTravelCalculatorTest, InitializesToZero) {
     CondExpTravelCalculator c;
     ASSERT_EQ(c.exp_travel.size(), 2 * c.max_width + 1);
-    EXPECT_EQ(c.exp_travel[0], 0);
-    EXPECT_EQ(c.exp_travel[2 * c.max_width], 0);
+    EXPECT_EQ(c.exp_travel.at(0), 0);
+    EXPECT_EQ(c.exp_travel.at(2 * c.max_width), 0);
 }
 
 TEST(CondExpTravelCalculatorTest, ProcessesBelt) {
@@ -163,13 +163,13 @@ TEST(CondExpTravelCalculatorTest, ProcessesBelt) {
 
     // We expect 5/2 units of travel on average above the belt and outside of it.
     auto dist = static_cast<double>(b - a) / 2;
-    EXPECT_EQ(c.exp_travel[0],          0);
-    EXPECT_EQ(c.exp_travel[2 * a - 1],  0);
-    EXPECT_EQ(c.exp_travel[2 * a],      0);
-    EXPECT_EQ(c.exp_travel[2 * a + 1],  dist);
-    EXPECT_EQ(c.exp_travel[2 * b - 1],  dist);
-    EXPECT_EQ(c.exp_travel[2 * b],      0);
-    EXPECT_EQ(c.exp_travel[2 * b + 1],  0);
+    EXPECT_EQ(c.exp_travel.at(0),          0);
+    EXPECT_EQ(c.exp_travel.at(2 * a - 1),  0);
+    EXPECT_EQ(c.exp_travel.at(2 * a),      0);
+    EXPECT_EQ(c.exp_travel.at(2 * a + 1),  dist);
+    EXPECT_EQ(c.exp_travel.at(2 * b - 1),  dist);
+    EXPECT_EQ(c.exp_travel.at(2 * b),      0);
+    EXPECT_EQ(c.exp_travel.at(2 * b + 1),  0);
 }
 
 TEST(CondExpTravelCalculatorTest, ProcessesBelts) {
@@ -190,27 +190,27 @@ TEST(CondExpTravelCalculatorTest, ProcessesBelts) {
     double dist3 = static_cast<double>(b3 - a3) / 2 + dist1 / 2 + dist2 / 2;
 
     // Test annotations.    
-    EXPECT_EQ(belts.belts[0].exp_travel_left, 0);
-    EXPECT_EQ(belts.belts[0].exp_travel_right, 0);
-    EXPECT_EQ(belts.belts[1].exp_travel_left, dist1);
-    EXPECT_EQ(belts.belts[1].exp_travel_right, 0);
-    EXPECT_EQ(belts.belts[2].exp_travel_left, dist1);
-    EXPECT_EQ(belts.belts[2].exp_travel_right, dist2);
+    EXPECT_EQ(belts.belts.at(0).exp_travel_left, 0);
+    EXPECT_EQ(belts.belts.at(0).exp_travel_right, 0);
+    EXPECT_EQ(belts.belts.at(1).exp_travel_left, dist1);
+    EXPECT_EQ(belts.belts.at(1).exp_travel_right, 0);
+    EXPECT_EQ(belts.belts.at(2).exp_travel_left, dist1);
+    EXPECT_EQ(belts.belts.at(2).exp_travel_right, dist2);
 
     // Test exoected travel distance.
-    EXPECT_EQ(c.exp_travel[0],          0);
-    EXPECT_EQ(c.exp_travel[2 * a1 - 1], 0);
-    EXPECT_EQ(c.exp_travel[2 * a1],     0);
-    EXPECT_EQ(c.exp_travel[2 * a1 + 1], dist1);
-    EXPECT_EQ(c.exp_travel[2 * a3 - 1], dist1);
-    EXPECT_EQ(c.exp_travel[2 * a3],     dist1);
-    EXPECT_EQ(c.exp_travel[2 * a3 + 1], dist3);
-    EXPECT_EQ(c.exp_travel[2 * b3 - 1], dist3);
-    EXPECT_EQ(c.exp_travel[2 * b3],     dist2);
-    EXPECT_EQ(c.exp_travel[2 * b3 + 1], dist2);
-    EXPECT_EQ(c.exp_travel[2 * b2 - 1], dist2);
-    EXPECT_EQ(c.exp_travel[2 * b2],     0);
-    EXPECT_EQ(c.exp_travel[2 * b2 + 1], 0);
+    EXPECT_EQ(c.exp_travel.at(0),          0);
+    EXPECT_EQ(c.exp_travel.at(2 * a1 - 1), 0);
+    EXPECT_EQ(c.exp_travel.at(2 * a1),     0);
+    EXPECT_EQ(c.exp_travel.at(2 * a1 + 1), dist1);
+    EXPECT_EQ(c.exp_travel.at(2 * a3 - 1), dist1);
+    EXPECT_EQ(c.exp_travel.at(2 * a3),     dist1);
+    EXPECT_EQ(c.exp_travel.at(2 * a3 + 1), dist3);
+    EXPECT_EQ(c.exp_travel.at(2 * b3 - 1), dist3);
+    EXPECT_EQ(c.exp_travel.at(2 * b3),     dist2);
+    EXPECT_EQ(c.exp_travel.at(2 * b3 + 1), dist2);
+    EXPECT_EQ(c.exp_travel.at(2 * b2 - 1), dist2);
+    EXPECT_EQ(c.exp_travel.at(2 * b2),     0);
+    EXPECT_EQ(c.exp_travel.at(2 * b2 + 1), 0);
 }
 
 struct LocationProbabilityCalculator {
@@ -235,11 +235,11 @@ struct LocationProbabilityCalculator {
 TEST(LocationProbabilityCalculatorTest, InitializesToIntervals) {
     LocationProbabilityCalculator c;
     ASSERT_EQ(c.distribution.size(), 2 * c.max_width + 1);
-    EXPECT_EQ(c.distribution[0], 0);
-    EXPECT_EQ(c.distribution[1], 1.0 / c.max_width);
-    EXPECT_EQ(c.distribution[2], 0);
-    EXPECT_EQ(c.distribution[2 * c.max_width - 1], 1.0 / c.max_width);  
-    EXPECT_EQ(c.distribution[2 * c.max_width], 0);
+    EXPECT_EQ(c.distribution.at(0), 0);
+    EXPECT_EQ(c.distribution.at(1), 1.0 / c.max_width);
+    EXPECT_EQ(c.distribution.at(2), 0);
+    EXPECT_EQ(c.distribution.at(2 * c.max_width - 1), 1.0 / c.max_width);  
+    EXPECT_EQ(c.distribution.at(2 * c.max_width), 0);
     EXPECT_NEAR(c.sum(), 1, 1e-10);
 }
 
